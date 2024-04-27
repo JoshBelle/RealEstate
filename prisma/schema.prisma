@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+model User {
+  id        String    @id @default(uuid()) // Идентификатор пользователя
+  email     String    @unique // Уникальный адрес электронной почты
+  password  String    // Пароль
+  name      String    // Имя пользователя
+  phone     String    // Номер телефона
+  city      String    // Город
+  role      Role      // Роль пользователя
+  createdAt DateTime  @default(now()) // Дата создания
+  updatedAt DateTime  @updatedAt // Дата последнего обновления
+}
+
+model City {
+  id          Int                 @id @default(autoincrement()) // Идентификатор города
+  name        String              // Название города
+  complexes   ResidentialComplex[]  // Жилые комплексы в городе
+}
+
+model Admin {
+  id        String    @id @default(uuid()) // Идентификатор администратора
+  email     String    @unique // Уникальный адрес электронной почты администратора
+  password  String    // Пароль администратора
+  name      String    // Имя администратора
+  phone     String    // Номер телефона администратора
+  city      String    // Город администратора
+  role      Role      @default(ADMIN) // Роль администратора
+  createdAt DateTime  @default(now()) // Дата создания
+  updatedAt DateTime  @updatedAt // Дата последнего обновления
+}
+
+model ResidentialComplex {
+  id              Int                 @id @default(autoincrement()) // Идентификатор жилого комплекса
+  name            String              // Название жилого комплекса
+  address         String              // Адрес жилого комплекса
+  city            City                @relation(fields: [cityId], references: [id]) // Город, к которому относится жилой комплекс
+  cityId          Int                 // Идентификатор города
+  description     String?             // Описание жилого комплекса
+  rating          Float?              // Рейтинг жилого комплекса
+  image           Bytes?              // Изображение жилого комплекса в виде байтов
+  deliveryDate    DateTime?           // Срок сдачи жилья
+  district        String?             // Район
+  class           String?             // Класс жилья
+  finishing       String?             // Отделка
+  price           Float?              // Стоимость
+  pricePerSqMeter Float?              // Стоимость за квадратный метр
+  createdAt       DateTime            @default(now()) // Дата создания
+  updatedAt       DateTime            @updatedAt // Дата последнего обновления
+  amenities       Amenity[]           // Удобства в жилом комплексе (Преимущества)
+  views           ResidentialComplexView[] // Просмотры жилого комплекса
+}
+
+model Complex {
+  id          Int      @id @default(autoincrement()) // Идентификатор комплекса
+  name        String   // Название комплекса
+  address     String   // Адрес комплекса
+  city        String   // Город комплекса
+  description String?  // Описание комплекса
+  rating      Float?   // Рейтинг комплекса
+  image       Bytes?   // Изображение комплекса в виде байтов
+  createdAt   DateTime @default(now()) // Дата создания
+  updatedAt   DateTime @updatedAt // Дата последнего обновления
+}
+
+model Amenity {
+  id          Int      @id @default(autoincrement()) // Идентификатор удобства
+  title       String   // Название удобства
+  description String   // Описание удобства
+  imageURL    String?  // Ссылка на изображение удобства
+  image       Bytes?   // Изображение удобства в виде байтов
+  complex     ResidentialComplex? @relation(fields: [complexId], references: [id]) // Жилой комплекс, к которому относится удобство
+  complexId   Int      // Идентификатор жилого комплекса
+}
+
+model BlogPost {
+  id          Int      @id @default(autoincrement()) // Идентификатор блог-поста
+  coverImage  String   // Ссылка на изображение обложки блога
+  category    Category // Категория блога
+  title       String   // Заголовок блога
+  sections    Section[] // Секции блог-поста
+  createdAt   DateTime @default(now()) // Дата создания
+  updatedAt   DateTime @updatedAt // Дата последнего обновления
+  views       BlogPostView[] // Просмотры блог-поста
+}
+
+enum Category {
+  STORIES     // Истории клиентов
+  PURCHASE    // Покупка
+  NEWS        // Новости
+  LIFEHACKS   // Лайфхаки
+  TIPS        // Советы
+}
+
+model Section {
+  id            Int       @id @default(autoincrement()) // Идентификатор секции
+  title         String?   // Заголовок секции
+  image         String?   // Изображение секции
+  description   String?   // Описание секции
+  blogPost      BlogPost? @relation(fields: [blogPostId], references: [id]) // Блог-пост, к которому относится секция
+  blogPostId    Int?      // Идентификатор блог-поста
+}
+
+model Promotion {
+  id          Int      @id @default(autoincrement()) // Идентификатор акции
+  title       String   // Название акции
+  coverImage  Bytes?   // Изображение обложки акции в виде байтов
+  description String   // Описание акции
+  createdAt   DateTime @default(now()) // Дата создания
+  updatedAt   DateTime @updatedAt // Дата последнего обновления
+  views       PromotionView[] // Просмотры акции
+}
+
+model ResidentialComplexView {
+  id                 Int                   @id @default(autoincrement()) // Идентификатор просмотра жилого комплекса
+  residentialComplex ResidentialComplex   @relation(fields: [residentialComplexId], references: [id]) // Жилой комплекс, который просматривается
+  userId             String                // Идентификатор пользователя
+  viewedAt           DateTime              @default(now()) // Временная метка просмотра
+  residentialComplexId Int                 // Идентификатор жилого комплекса
+}
+
+model BlogPostView {
+  id          Int       @id @default(autoincrement()) // Идентификатор просмотра блог-поста
+  blogPost    BlogPost  @relation(fields: [blogPostId], references: [id]) // Блог-пост, который просматривается
+  userId      String    // Идентификатор пользователя
+  viewedAt    DateTime  @default(now()) // Временная метка просмотра
+  blogPostId  Int       // Идентификатор блог-поста
+}
+
+model PromotionView {
+  id          Int         @id @default(autoincrement()) // Идентификатор просмотра акции
+  promotion   Promotion  @relation(fields: [promotionId], references: [id]) // Акция, которая просматривается
+  userId      String      // Идентификатор пользователя
+  viewedAt    DateTime    @default(now()) // Временная метка просмотра
+  promotionId Int        // Идентификатор акции
+}
