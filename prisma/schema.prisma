@@ -14,21 +14,23 @@ enum Role {
 }
 
 model User {
-  id        String    @id @default(uuid()) // Идентификатор пользователя
-  email     String    @unique // Уникальный адрес электронной почты
-  password  String    // Пароль
-  name      String    // Имя пользователя
-  phone     String    // Номер телефона
-  city      String    // Город
-  role      Role      // Роль пользователя
-  createdAt DateTime  @default(now()) // Дата создания
-  updatedAt DateTime  @updatedAt // Дата последнего обновления
+  id             String             @id @default(uuid()) // Идентификатор пользователя
+  email          String             @unique // Уникальный адрес электронной почты
+  password       String             // Пароль
+  name           String             // Имя пользователя
+  phone          String             // Номер телефона
+  city           String             // Город
+  role           Role               // Роль пользователя
+  createdAt      DateTime           @default(now()) // Дата создания
+  updatedAt      DateTime           @updatedAt // Дата последнего обновления
+  addedComplexes ResidentialComplex[] // Комплексы, добавленные пользователем
 }
+
 
 model City {
   id          Int                 @id @default(autoincrement()) // Идентификатор города
   name        String              // Название города
-  complexes   ResidentialComplex[]  // Жилые комплексы в городе
+  complexes   ResidentialComplex[] // Жилые комплексы в городе
 }
 
 model Admin {
@@ -62,19 +64,10 @@ model ResidentialComplex {
   updatedAt       DateTime            @updatedAt // Дата последнего обновления
   amenities       Amenity[]           // Удобства в жилом комплексе (Преимущества)
   views           ResidentialComplexView[] // Просмотры жилого комплекса
+  users           User[]              // Пользователи, связанные с этим жилым комплексом
+  apartments      Apartment[]         // Квартиры в жилом комплексе
 }
 
-model Complex {
-  id          Int      @id @default(autoincrement()) // Идентификатор комплекса
-  name        String   // Название комплекса
-  address     String   // Адрес комплекса
-  city        String   // Город комплекса
-  description String?  // Описание комплекса
-  rating      Float?   // Рейтинг комплекса
-  image       Bytes?   // Изображение комплекса в виде байтов
-  createdAt   DateTime @default(now()) // Дата создания
-  updatedAt   DateTime @updatedAt // Дата последнего обновления
-}
 
 model Amenity {
   id          Int      @id @default(autoincrement()) // Идентификатор удобства
@@ -84,6 +77,19 @@ model Amenity {
   image       Bytes?   // Изображение удобства в виде байтов
   complex     ResidentialComplex? @relation(fields: [complexId], references: [id]) // Жилой комплекс, к которому относится удобство
   complexId   Int      // Идентификатор жилого комплекса
+}
+
+model Apartment {
+  id           Int       @id @default(autoincrement()) // Идентификатор квартиры
+  image        Bytes?    // Изображение квартиры в виде байтов
+  rooms        Int       // Количество комнат
+  area         Float     // Площадь в квадратных метрах
+  floor        Int       // Этаж
+  buildingPart String?   // Литер
+  deliveryDate DateTime? // Дата сдачи
+  price        Float     // Цена
+  complex      ResidentialComplex @relation(fields: [complexId], references: [id]) // Жилой комплекс, к которому относится квартира
+  complexId    Int       // Идентификатор жилого комплекса
 }
 
 model BlogPost {
